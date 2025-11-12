@@ -1,0 +1,54 @@
+services:
+  postgres_exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${DB_USER}:${DB_PASSWORD}@host.docker.internal:${DB_PORT}/${DB_NAME}?sslmode=disable"
+    ports:
+      - "9187:9187"
+    restart: unless-stopped
+    env_file: .env
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
+  custom_exporter:
+    build: ./custom_exporter
+    container_name: custom_exporter
+    environment:
+      OWM_API_KEY: ${OWM_API_KEY}
+      OWM_CITY: ${OWM_CITY}
+      OWM_UNITS: ${OWM_UNITS}
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    env_file: .env
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - postgres_exporter
+      - node_exporter
+      - custom_exporter
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GF_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_PASSWORD}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped

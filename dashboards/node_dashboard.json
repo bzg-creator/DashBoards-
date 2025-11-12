@@ -1,0 +1,101 @@
+{
+  "__inputs": [
+    { "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus", "pluginName": "Prometheus" }
+  ],
+  "title": "⚙️ Node Exporter — System Monitoring",
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "version": 1,
+  "refresh": "5s",
+  "templating": {
+    "list": [
+      {
+        "name": "instance",
+        "type": "query",
+        "datasource": "${DS_PROMETHEUS}",
+        "query": "label_values(node_cpu_seconds_total, instance)",
+        "refresh": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CPU usage (%)",
+      "datasource": "${DS_PROMETHEUS}",
+      "fieldConfig": { "defaults": { "unit": "percent" } },
+      "targets": [
+        { "expr": "100 - (avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\"}[$__rate_interval])) * 100)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "CPU usage per core (%)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "100 - (rate(node_cpu_seconds_total{mode=\"idle\"}[$__rate_interval]) * 100)" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Memory used (GB)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / 1024 / 1024 / 1024" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "RAM usage (%)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "(1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk usage (%)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "(1 - node_filesystem_avail_bytes{fstype!~\"tmpfs|overlay\"} / node_filesystem_size_bytes{fstype!~\"tmpfs|overlay\"}) * 100" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk read (bytes/sec)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "sum(rate(node_disk_read_bytes_total[$__rate_interval]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk write (bytes/sec)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "sum(rate(node_disk_written_bytes_total[$__rate_interval]))" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Network RX/TX (MB/s)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "sum(rate(node_network_receive_bytes_total{device!~\"lo\"}[$__rate_interval])) / 1024 / 1024", "legendFormat": "RX" },
+        { "expr": "sum(rate(node_network_transmit_bytes_total{device!~\"lo\"}[$__rate_interval])) / 1024 / 1024", "legendFormat": "TX" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "System uptime (hours)",
+      "datasource": "${DS_PROMETHEUS}",
+      "fieldConfig": { "defaults": { "unit": "h" } },
+      "targets": [{ "expr": "(node_time_seconds - node_boot_time_seconds) / 3600" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Processes: running vs blocked",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [
+        { "expr": "node_procs_running", "legendFormat": "running" },
+        { "expr": "node_procs_blocked", "legendFormat": "blocked" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "__inputs": [
+    { "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus", "pluginName": "Prometheus" }
+  ],
+  "title": "🌦 OpenWeather — Custom Exporter",
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    { "type": "timeseries", "title": "Temperature (°C)",         "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_temperature_celsius" }] },
+    { "type": "timeseries", "title": "Feels like (°C)",           "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_feels_like_celsius" }] },
+    { "type": "timeseries", "title": "Humidity (%)",              "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_humidity_percent" }] },
+    { "type": "timeseries", "title": "Pressure (hPa)",            "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_pressure_hpa" }] },
+    { "type": "timeseries", "title": "Wind speed (m/s)",          "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_wind_speed_mps" }] },
+    { "type": "stat",       "title": "Wind direction (°)",        "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_wind_direction_deg" }] },
+    { "type": "timeseries", "title": "Clouds (%)",                "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_clouds_percent" }] },
+    { "type": "timeseries", "title": "Visibility (m)",            "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_visibility_m" }] },
+    { "type": "stat",       "title": "Condition code",            "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_condition_code" }] },
+    { "type": "timeseries", "title": "API response time (ms)",    "datasource": "${DS_PROMETHEUS}", "targets": [{ "expr": "weather_api_response_time_ms" }] }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "__inputs": [
+    { "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus", "pluginName": "Prometheus" }
+  ],
+  "title": "📊 PostgreSQL — Des1 Database (Exporter)",
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "version": 1,
+  "refresh": "5s",
+  "templating": {
+    "list": [
+      {
+        "name": "db",
+        "type": "query",
+        "datasource": "${DS_PROMETHEUS}",
+        "query": "label_values(pg_database_size_bytes, datname)",
+        "current": { "text": "Des1", "value": "Des1" },
+        "refresh": 1
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Active connections (all DBs)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "sum(pg_stat_activity_count)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Database size (GB) — $db",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "pg_database_size_bytes{datname=\"$db\"} / 1024 / 1024 / 1024" }]
+    },
+    {
+      "type": "stat",
+      "title": "PostgreSQL uptime (hours)",
+      "datasource": "${DS_PROMETHEUS}",
+      "fieldConfig": { "defaults": { "unit": "h" } },
+      "targets": [{ "expr": "(time() - pg_postmaster_start_time_seconds) / 3600" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Read ops/sec — $db",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "rate(pg_stat_database_tup_fetched{datname=\"$db\"}[2m])" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Insert ops/sec — $db",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "rate(pg_stat_database_tup_inserted{datname=\"$db\"}[2m])" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Update ops/sec — $db",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "rate(pg_stat_database_tup_updated{datname=\"$db\"}[2m])" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Delete ops/sec — $db",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "rate(pg_stat_database_tup_deleted{datname=\"$db\"}[2m])" }]
+    },
+    {
+      "type": "stat",
+      "title": "Backend processes — $db",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "pg_stat_database_numbackends{datname=\"$db\"}" }]
+    },
+    {
+      "type": "barchart",
+      "title": "Live rows by table (all schemas)",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "sum(pg_stat_user_tables_n_live_tup) by (relname)" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Transactions/sec (commits) — $db",
+      "datasource": "${DS_PROMETHEUS}",
+      "targets": [{ "expr": "rate(pg_stat_database_xact_commit{datname=\"$db\"}[2m])" }]
+    }
+  ]
+}
